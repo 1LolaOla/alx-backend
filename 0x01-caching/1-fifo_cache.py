@@ -1,39 +1,30 @@
 #!/usr/bin/env python3
 """FIFO caching"""
-from base_caching import BaseCaching
+
+from collections import deque
+BaseCaching = __import__('base_caching').BaseCaching
+
 
 class FIFOCache(BaseCaching):
-    """define class for FIFO caching
-
-    Args:
-        BaseCaching (class): parent class
-    """
+    """FIFO caching class"""
 
     def __init__(self):
+        """initialize """
         super().__init__()
+        self.key_queue = []
 
     def put(self, key, item):
-        """store cache data
-
-        Args:
-            key (_type_): key
-            item (_type_): value
-        """
-        if key and item:
-            self.cache_data[key] = item
-
-        if len(self.cache_data) > self.MAX_ITEMS:
-            keys_list = list(self.cache_data.keys())
-            del self.cache_data[keys_list[0]]
-            print(f'DISCARD: {keys_list[0]}')
+        """Add an item to cache"""
+        if key is not None and item is not None and key not in self.cache_data:
+            if len(self.cache_data) >= BaseCaching.MAX_ITEMS:
+                first_item = self.key_queue.pop(0)
+                del self.cache_data[first_item]
+                print(f"DISCARD: {first_item}")
+        self.cache_data[key] = item
+        self.key_queue.append(key)
 
     def get(self, key):
-        """get value associated with key
-
-        Args:
-            key (_type_): cache_data key
-
-        Returns:
-            _type_: None if unsuccessful else data at key
-        """
-        return self.cache_data.get(key)
+        """get from cache"""
+        if key is not None and key in self.cache_data:
+            return self.cache_data[key]
+        return None
