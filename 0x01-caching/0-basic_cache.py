@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """Pyton basic caching"""
-
 BaseCaching = __import__('base_caching').BaseCaching
 
 
