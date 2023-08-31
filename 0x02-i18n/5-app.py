@@ -1,19 +1,25 @@
 #!/usr/bin/env python3
 """ Creating a user login system """
+
 from flask import Flask, render_template, request, g
 from flask_babel import Babel
 
 
 class Config(object):
-    """config class to configure available languages"""
+    """_summary_
 
-    LANGUAGES = ["en", "fr"]
-    BABEL_DEFAULT_LOCALE = "en"
-    BABEL_DEFAULT_TIMEZONE = "UTC"
+    Returns:
+                    _type_: _description_
+    """
+    LANGUAGES = ['en', 'fr']
+    BABEL_DEFAULT_LOCALE = 'en'
+    BABEL_DEFAULT_TIMEZONE = 'UTC'
 
 
+# configure the flask app
 app = Flask(__name__)
 app.config.from_object(Config)
+app.url_map.strict_slashes = False
 babel = Babel(app)
 
 
@@ -25,38 +31,46 @@ users = {
 }
 
 
-@babel.localeselector
-def get_locale():
-    """get the locale lang"""
-    lang = request.args.get("locale")
-    if lang in app.config['LANGUAGES']:
-        return lang
-    return request.accept_languages.best_match(app.config['LANGUAGES'])
-
-
-def get_user(login_as):
-    """return user dict"""
-    if not login_as:
-        return None
-    return users.get(int(login_as))
+def get_user():
+    """returns a user dictionary or None if the ID cannot be found
+    """
+    login_id = request.args.get('login_as')
+    if login_id:
+        return users.get(int(login_id))
+    return None
 
 
 @app.before_request
-def before_request():
-    """pre hook before request"""
-    login_as = request.args.get("login_as")
-    g.user = get_user(login_as)
+def before_request() -> None:
+    """_summary_
+    """
+    user = get_user()
+    g.user = user
 
 
-@app.route('/', strict_slashes=False)
+@babel.localeselector
+def get_locale():
+    """_summary_
+
+    Returns:
+                    _type_: _description_
+    """
+    locale = request.args.get('locale')
+    if locale in app.config['LANGUAGES']:
+        print(locale)
+        return locale
+
+    return request.accept_languages.best_match(app.config['LANGUAGES'])
+
+# babel.init_app(app, locale_selector=get_locale)
+
+
+@app.route('/')
 def index():
-    """route index"""
-    username = None
-    print(f"user {g.user}")
-    if g.user:
-        username = g.user.get('name')
-    return render_template('5-index.html', username=username)
+    """_summary_
+    """
+    return render_template('5-index.html')
 
 
-if __name__ == "__main__":
-    app.run(debug=True)
+if __name__ == '__main__':
+    app.run(port="5000", host="0.0.0.0", debug=True)
