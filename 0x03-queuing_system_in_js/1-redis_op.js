@@ -1,29 +1,28 @@
-import redis from 'redis';
-import util from 'util'; // Import the util module
-
+import redis from "redis";
 
 const client = redis.createClient();
 
-// client = redis.createClient();
-
-client.on('error', (err) => console.log(`Redis client not connected to the server: ${err}`));
+client.on('error', error => {
+    console.log(`Redis client connected to the server: ${error.message}`);
+});
 
 client.on('connect', () => {
     console.log('Redis client connected to the server');
-}).on('error', (err) => {
-    console.log(`Redis client not connected to the server: ${err}`);
 });
 
+
 function setNewSchool(schoolName, value) {
-    client.set(schoolName, value, (error, response) => {
-        redis.print(`Reply: ${response}`);
-    });
+    client.set(schoolName, value, redis.print);
 }
 
-let displaySchoolValue = async schoolName => {
-    const getAsync = util.promisify(client.get).bind(client);
-    console.log(await getAsync(schoolName));
-};
+function displaySchoolValue(schoolName) {
+    client.get(schoolName, (error, value) => {
+        if (error) console.error(error);
+        else console.log(value)
+    })
+}
+
 displaySchoolValue('Holberton');
 setNewSchool('HolbertonSanFrancisco', '100');
 displaySchoolValue('HolbertonSanFrancisco');
+
